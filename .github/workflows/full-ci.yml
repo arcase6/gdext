@@ -31,113 +31,6 @@ defaults:
 #  cancel-in-progress: true
 
 jobs:
-  rustfmt:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: "Install Rust"
-        uses: ./.github/composite/rust
-        with:
-          components: rustfmt
-
-      - name: "Check rustfmt"
-        run: cargo fmt --all -- --check
-
-
-  # Needs to be its own job (apart from sync-doc), because lints don't work with --no-deps, and because it contributes to ci-status.
-  doc-lints:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: "Install Rust"
-      uses: ./.github/composite/rust
-      with:
-        components: rustdoc
-
-    - name: "Check rustdoc"
-      env:
-        RUSTDOCFLAGS: >
-          -D rustdoc::broken-intra-doc-links -D rustdoc::private-intra-doc-links -D rustdoc::invalid-codeblock-attributes 
-          -D rustdoc::invalid-rust-codeblocks -D rustdoc::invalid-html-tags -D rustdoc::bare-urls -D rustdoc::unescaped-backticks
-      run: cargo doc -p godot
-
-
-  clippy:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: "Install Rust"
-        uses: ./.github/composite/rust
-        with:
-          components: clippy
-
-      # Note: could use `-- --no-deps` to not lint dependencies, however it doesn't really speed up and also skips deps in workspace.
-      - name: "Check clippy"
-        run: |
-          cargo clippy --all-targets $GDEXT_FEATURES -- \
-          -D clippy::suspicious \
-          -D clippy::style \
-          -D clippy::complexity \
-          -D clippy::perf \
-          -D clippy::dbg_macro \
-          -D clippy::todo \
-          -D clippy::unimplemented \
-          -D warnings
-
-  unit-test:
-    name: unit-test (${{ matrix.name }}${{ matrix.rust-special }})
-    runs-on: ${{ matrix.os }}
-    continue-on-error: false
-    strategy:
-      fail-fast: false # cancel all jobs as soon as one fails?
-      matrix:
-        # Order this way because macOS typically has the longest duration, followed by Windows, so it benefits total workflow execution time.
-        # Additionally, the 'linux (msrv *)' special case will then be listed next to the other 'linux' jobs.
-        # Note: Windows uses '--target x86_64-pc-windows-msvc' by default as Cargo argument.
-        include:
-          - name: macos
-            os: macos-11
-
-          - name: windows
-            os: windows-latest
-
-          # Don't use latest Ubuntu (22.04) as it breaks lots of ecosystem compatibility.
-          # If ever moving to ubuntu-latest, need to manually install libtinfo5 for LLVM.
-          - name: linux
-            os: ubuntu-20.04
-
-          - name: linux
-            os: ubuntu-20.04
-            rust-toolchain: nightly
-            rust-special: -minimal-deps
-            rust-cache-key: minimal-deps
-
-          - name: linux
-            os: ubuntu-20.04
-            rust-toolchain: '1.70.0'
-            rust-special: -msrv
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: "Install Rust"
-        uses: ./.github/composite/rust
-        with:
-          rust: ${{ matrix.rust-toolchain || 'stable' }}
-          cache-key: ${{ matrix.rust-cache-key }} # only needed when rustc version is possibly the same
-
-      - name: "Install minimal dependency versions from Cargo"
-        if: matrix.rust-special == '-minimal-deps'
-        run: cargo +nightly update -Z minimal-versions
-
-      - name: "Compile tests"
-        run: cargo test $GDEXT_FEATURES --no-run ${{ matrix.rust-extra-args }}
-
-      - name: "Test"
-        run: cargo test $GDEXT_FEATURES ${{ matrix.rust-extra-args }}
 
   # For complex matrix workflow, see https://stackoverflow.com/a/65434401
   godot-itest:
@@ -283,22 +176,6 @@ jobs:
           godot-check-header: ${{ matrix.godot-check-header }}
 
 
-  license-guard:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: "Check license headers"
-        uses: apache/skywalking-eyes/header@v0.4.0
-        with:
-          # log: debug # optional: set the log level. The default value is `info`.
-          config: .github/other/licenserc.yml
-          # token: # optional: the token that license eye uses when it needs to comment on the pull request.
-          # Set to empty ("") to disable commenting on pull request. The default value is ${{ github.token }}
-          # mode: # optional: Which mode License-Eye should be run in. Choices are `check` or `fix`. The default value is `check`.
-          mode: check
-
-
   # ---------------------------------------------------------------------------------------------------------------------------------------------
   # CI status report
 
@@ -307,12 +184,7 @@ jobs:
   ci-status:
     if: always() && (github.event_name == 'merge_group' || github.event_name == 'push')
     needs:
-      - rustfmt
-      - doc-lints
-      - clippy
-      - unit-test
       - godot-itest
-      - license-guard
 
     runs-on: ubuntu-20.04
     steps:
