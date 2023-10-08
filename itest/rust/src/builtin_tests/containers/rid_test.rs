@@ -37,7 +37,7 @@ fn canvas_set_parent() {
     server.free_rid(viewport);
 }
 
-#[itest]
+#[itest(focus)]
 fn multi_thread_test() {
     let threads = (0..10)
         .map(|_| {
