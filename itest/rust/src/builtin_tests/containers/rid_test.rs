@@ -39,6 +39,8 @@ fn canvas_set_parent() {
 
 #[itest(focus)]
 fn multi_thread_test() {
+    eprintln!("Begin multi-thread test.");
+
     let threads = (0..10)
         .map(|_| {
             thread::spawn(|| {
@@ -66,6 +68,8 @@ fn multi_thread_test() {
     for rid in rids.iter() {
         server.free_rid(*rid);
     }
+
+    println!("End multi-thread test.");
 }
 
 /// Check that godot does not crash upon receiving various RIDs that may be edge cases. As it could do in Godot 3.
