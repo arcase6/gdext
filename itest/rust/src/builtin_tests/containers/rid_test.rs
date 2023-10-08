@@ -37,7 +37,7 @@ fn canvas_set_parent() {
     server.free_rid(viewport);
 }
 
-#[itest(focus)]
+#[itest]
 fn multi_thread_test() {
     eprintln!("Begin multi-thread test.");
 
