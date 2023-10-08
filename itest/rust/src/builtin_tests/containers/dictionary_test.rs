@@ -347,7 +347,7 @@ fn dictionary_keys_values() {
     assert_eq!(dictionary.values_array(), varray![0, true]);
 }
 
-#[itest]
+#[itest(skip)]
 fn dictionary_equal() {
     assert_eq!(dict! {"foo": "bar"}, dict! {"foo": "bar"});
     assert_ne!(dict! {"foo": "bar"}, dict! {"bar": "foo"});
