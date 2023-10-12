@@ -50,7 +50,31 @@ jobs:
         include:
           # macOS
 
-          - name: macos
+          - name: macos-1
+            os: macos-12
+            artifact-name: macos-nightly
+            godot-binary: godot.macos.editor.dev.x86_64
+            rust-extra-args: --features godot/custom-godot
+
+          - name: macos-2
+            os: macos-12
+            artifact-name: macos-nightly
+            godot-binary: godot.macos.editor.dev.x86_64
+            rust-extra-args: --features godot/custom-godot
+
+          - name: macos-3
+            os: macos-12
+            artifact-name: macos-nightly
+            godot-binary: godot.macos.editor.dev.x86_64
+            rust-extra-args: --features godot/custom-godot
+
+          - name: macos-4
+            os: macos-12
+            artifact-name: macos-nightly
+            godot-binary: godot.macos.editor.dev.x86_64
+            rust-extra-args: --features godot/custom-godot
+
+          - name: macos-5
             os: macos-12
             artifact-name: macos-nightly
             godot-binary: godot.macos.editor.dev.x86_64
