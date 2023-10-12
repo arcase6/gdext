@@ -100,13 +100,20 @@ fn update_version_file(version: &str) {
 */
 
 pub(crate) fn read_godot_version(godot_bin: &Path) -> GodotVersion {
-    // FIXME remove
-    // Read from env var CI_GODOT4_VERSION, if present
-    if let Ok(string) = std::env::var("GODOT_VERSION_CI") {
-        println!("Found GODOT_VERSION_CI env var with version: '{string}'");
-        println!("cargo:rerun-if-env-changed=GODOT_VERSION_CI");
-        return parse_godot_version(&string).expect("parse CI_GODOT4_VERSION");
-    }
+    // // FIXME remove
+    // // Read from env var CI_GODOT4_VERSION, if present
+    // if let Ok(string) = std::env::var("GODOT_VERSION_CI") {
+    //     println!("Found GODOT_VERSION_CI env var with version: '{string}'");
+    //     println!("cargo:rerun-if-env-changed=GODOT_VERSION_CI");
+    //     return parse_godot_version(&string).expect("parse CI_GODOT4_VERSION");
+    // }
+
+    // CHECKSUM: md5 and sha256 checksums of the Godot binary
+    println!("!!CHECKSUM!!");
+    let mut cmd = Command::new("shasum");
+    cmd.arg("-a").arg("256").arg(godot_bin);
+
+    execute(cmd, "read Godot checksum");
 
     // On macOS, it spuriously happened since around Oct 2023, that the `--version` exited with signal: 11 (SIGSEGV).
     // This could only be reproduced with Rust's Command::new(), not when invoking the executable from bash.

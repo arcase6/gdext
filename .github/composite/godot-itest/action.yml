@@ -131,7 +131,7 @@ runs:
         RUSTFLAGS: ${{ inputs.rust-env-rustflags }}
         TARGET: ${{ inputs.rust-target }}
       run: |
-        cargo build -p godot ${{ inputs.rust-extra-args }}
+        cargo build -p godot ${{ inputs.rust-extra-args }} -vv
         echo "OUTCOME=success" >> $GITHUB_ENV
       shell: bash
 
