@@ -74,6 +74,7 @@ runs:
         godotVer=$($GODOT4_BIN --version | xargs)
         gitSha=$(echo $godotVer | sed -E "s/.+custom_build\.//")
         echo "GODOT_BUILT_FROM=_Built from [\`$godotVer\`](https://github.com/godotengine/godot/commit/$gitSha)._" >> $GITHUB_ENV
+        echo "GODOT_VERSION_CI=$godotVer" >> $GITHUB_ENV
       shell: bash
 
     - name: "Install Rust"
