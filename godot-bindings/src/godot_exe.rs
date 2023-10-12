@@ -110,10 +110,14 @@ pub(crate) fn read_godot_version(godot_bin: &Path) -> GodotVersion {
             )
         });
 
-    let output = String::from_utf8(output.stdout).expect("convert Godot version to UTF-8");
-    println!("Godot version: {output}");
+    let stdout = String::from_utf8(output.stdout).expect("convert Godot stdout to UTF-8");
+    let stderr = String::from_utf8(output.stderr).expect("convert Godot stderr to UTF-8");
 
-    match parse_godot_version(&output) {
+    eprintln!("godot-stdout: {stdout}.");
+    eprintln!("godot-stderr: {stderr}.");
+    eprintln!("godot-exit:   {exit}.\n", exit = output.status);
+
+    match parse_godot_version(&stdout) {
         Ok(parsed) => {
             assert_eq!(
                 parsed.major,
