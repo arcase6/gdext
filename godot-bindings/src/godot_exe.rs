@@ -103,21 +103,17 @@ pub(crate) fn read_godot_version(godot_bin: &Path) -> GodotVersion {
     // On macOS, it spuriously happened since around Oct 2023, that the `--version` output was empty.
     // This could only be reproduced with Rust's Command::new(), not when invoking the executable from bash.
     // Since I don't have time to debug rustc, let's retry a few times.
-    for _ in 0..10 {
-        let output = Command::new(godot_bin)
-            .arg("--version")
-            .output()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "failed to invoke Godot executable '{}'",
-                    godot_bin.display()
-                )
-            });
+    //for _ in 0..10 {
 
-        if !output.stdout.is_empty() {
-            break;
-        }
-    }
+    let mut cmd = Command::new(godot_bin);
+    cmd.arg("--version");
+
+    let output = execute(cmd, "read Godot version");
+
+    //     if !output.stdout.is_empty() {
+    //         break;
+    //     }
+    // }
 
     let stdout = String::from_utf8(output.stdout).expect("convert Godot stdout to UTF-8");
     let stderr = String::from_utf8(output.stderr).expect("convert Godot stderr to UTF-8");
