@@ -123,14 +123,14 @@ pub(crate) fn read_godot_version(godot_bin: &Path) -> GodotVersion {
                 parsed.major,
                 4,
                 "Only Godot versions >= 4.0 are supported; found version {}.",
-                output.trim()
+                stdout.trim()
             );
 
             parsed
         }
         Err(e) => {
             // Don't treat this as fatal error
-            panic!("failed to parse Godot version '{output}': {e}")
+            panic!("failed to parse Godot version '{stdout}': {e}")
         }
     }
 }
