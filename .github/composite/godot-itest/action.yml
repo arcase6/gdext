@@ -67,6 +67,15 @@ runs:
         artifact-name: ${{ inputs.artifact-name }}
         godot-binary: ${{ inputs.godot-binary }}
 
+    - name: "Print Godot version 20 times"
+      run: |
+        echo "CHECKSUM_BASH: "
+        shasum -a 256 $GODOT4_BIN
+        for i in {1..20}; do
+          $GODOT4_BIN --version
+        done
+      shell: bash
+
     # The chmod seems still necessary, although applied before uploading artifact. Possibly modes are not preserved.
     # The `| xargs` pattern trims the output, since printed version may contain extra newline, which causes problems in env vars.
     - name: "Inspect Godot version"
