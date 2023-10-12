@@ -100,20 +100,26 @@ fn update_version_file(version: &str) {
 */
 
 pub(crate) fn read_godot_version(godot_bin: &Path) -> GodotVersion {
-    // On macOS, it spuriously happened since around Oct 2023, that the `--version` output was empty.
+    // On macOS, it spuriously happened since around Oct 2023, that the `--version` exited with signal: 11 (SIGSEGV).
     // This could only be reproduced with Rust's Command::new(), not when invoking the executable from bash.
     // Since I don't have time to debug rustc, let's retry a few times.
-    //for _ in 0..10 {
+    let mut output = None;
+    for _ in 0..10 {
+        let mut cmd = Command::new(godot_bin);
+        cmd.arg("--version");
 
-    let mut cmd = Command::new(godot_bin);
-    cmd.arg("--version");
+        match try_execute(cmd, "read Godot version") {
+            Ok(o) => {
+                output = Some(o);
+                break;
+            }
+            Err(e) => {
+                eprintln!("Attempt failed -- {e}");
+            }
+        }
+    }
 
-    let output = execute(cmd, "read Godot version");
-
-    //     if !output.stdout.is_empty() {
-    //         break;
-    //     }
-    // }
+    let output = output.expect("all attempts to read Godot version failed");
 
     let stdout = String::from_utf8(output.stdout).expect("convert Godot stdout to UTF-8");
     let stderr = String::from_utf8(output.stderr).expect("convert Godot stderr to UTF-8");
@@ -284,10 +290,14 @@ pub(crate) fn locate_godot_binary() -> PathBuf {
     }
 }
 
-fn execute(mut cmd: Command, error_message: &str) -> Output {
+fn execute(cmd: Command, error_message: &str) -> Output {
+    try_execute(cmd, error_message).unwrap_or_else(|e| panic!("{}", e))
+}
+
+fn try_execute(mut cmd: Command, error_message: &str) -> Result<Output, String> {
     let output = cmd
         .output()
-        .unwrap_or_else(|_| panic!("failed to execute command ({error_message})\n\t{cmd:?}"));
+        .map_err(|_| format!("failed to invoke command ({error_message})\n\t{cmd:?}"))?;
 
     if output.status.success() {
         println!(
@@ -299,12 +309,14 @@ fn execute(mut cmd: Command, error_message: &str) -> Output {
             String::from_utf8(output.stderr.clone()).unwrap()
         );
         println!("[status] {}", output.status);
-        output
+        Ok(output)
     } else {
         println!("[stdout] {}", String::from_utf8(output.stdout).unwrap());
         println!("[stderr] {}", String::from_utf8(output.stderr).unwrap());
         println!("[status] {}", output.status);
-        panic!("command returned error: {error_message}");
+        Err(format!(
+            "command returned error ({error_message})\n\t{cmd:?}"
+        ))
     }
 }
 
