@@ -287,7 +287,7 @@ pub(crate) fn locate_godot_binary() -> PathBuf {
 fn execute(mut cmd: Command, error_message: &str) -> Output {
     let output = cmd
         .output()
-        .unwrap_or_else(|_| panic!("failed to execute command: {error_message}"));
+        .unwrap_or_else(|_| panic!("failed to execute command ({error_message})\n\t{cmd:?}"));
 
     if output.status.success() {
         println!(
