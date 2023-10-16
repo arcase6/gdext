@@ -254,18 +254,25 @@ fn object_user_free_during_bind() {
     let obj = Gd::new(ObjPayload {});
     let guard = obj.bind();
 
+    println!(">> 1");
     let copy = obj.clone(); // TODO clone allowed while bound?
-
+    println!(">> 2");
     expect_panic("direct free() on user while it's bound", move || {
+        println!(">> 3");
         copy.free();
+        println!(">> 4");
     });
+    println!(">> 5");
 
     drop(guard);
+    println!(">> 6");
     assert!(
         obj.is_instance_valid(),
         "object lives on after failed free()"
     );
+    println!(">> 7");
     obj.free(); // now succeeds
+    println!(">> 8");
 }
 
 #[itest]
