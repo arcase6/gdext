@@ -15,3 +15,7 @@ members = [
     # utils
     "godot-fmt",
 ]
+
+[patch."https://github.com/godot-rust/godot4-prebuilt".godot4-prebuilt]
+git = "https://github.com//godot-rust/godot4-prebuilt"
+branch = "4.0.4"

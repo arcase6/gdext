@@ -127,7 +127,11 @@ impl IntegrationTests {
         let mut last_file = None;
         for test in tests {
             print_test_pre(test.name, test.file.to_string(), &mut last_file, false);
+
+            println!("before...");
             let outcome = run_rust_test(&test, &ctx);
+            println!("...after.");
+
 
             self.update_stats(&outcome, test.file, test.name);
             print_test_post(test.name, outcome);
@@ -299,7 +303,14 @@ fn run_rust_test(test: &RustTestCase, ctx: &TestContext) -> TestOutcome {
 
     // Explicit type to prevent tests from returning a value
     let err_context = || format!("itest `{}` failed", test.name);
-    let success: Option<()> = godot::private::handle_panic(err_context, || (test.function)(ctx));
+    println!("before handle_panic...");
+    let success: Option<()> = godot::private::handle_panic(err_context, || {
+        println!("before closure...");
+        let result = (test.function)(ctx);
+        println!("...after closure");
+        result
+    });
+    println!("...after handle_panic.");
 
     TestOutcome::from_bool(success.is_some())
 }
