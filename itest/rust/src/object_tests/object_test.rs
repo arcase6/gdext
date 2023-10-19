@@ -238,7 +238,7 @@ fn object_dynamic_free() {
     );
 }
 
-#[itest(focus)]
+#[itest]
 fn object_user_bind_after_free() {
     let obj = Gd::new(ObjPayload {});
     let copy = obj.clone();
@@ -249,7 +249,7 @@ fn object_user_bind_after_free() {
     });
 }
 
-#[itest(focus)]
+#[itest]
 fn object_user_free_during_bind() {
     let obj = Gd::new(ObjPayload {});
     let guard = obj.bind();
